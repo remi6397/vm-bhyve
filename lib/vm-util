@@ -99,7 +99,8 @@ util::check_bhyve_support(){
 # @return success if host has vt-d or amdvi
 #
 util::check_bhyve_iommu(){
-    local _vtd
+    local _intel_acpidump
+    local _bsd_acpidump
     local _amdvi
 
     # don't check if user wants to bypass host checks
@@ -107,9 +108,10 @@ util::check_bhyve_iommu(){
     # with iommu support that our tests fail for.
     util::yesno "$vm_disable_host_checks" && return 0
 
-    _vtd=$(acpidump -t |grep DMAR)
+    _intel_acpidump=$(/usr/local/bin/acpidump |grep DMAR)
+    _bsd_acpidump=$(acpidump -t |grep DMAR)
     _amdvi=$(sysctl hw |grep 'vmm.amdvi.enable: 1')
-    [ -z "${_vtd}" -a -z "${_amdvi}" ] && return 1
+    [ -z "${_intel_acpidump}" -a -z "${_bsd_acpidump}" -a -z "${_amdvi}" ] && return 1
 
     return 0
 }
